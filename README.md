@@ -1,10 +1,37 @@
 # DevTrack
 
-A minimal, dark-themed issue tracker for engineering teams. Supports multiple projects, per-project issue management, and a live insights panel.
+A minimal, dark-themed issue tracker built for engineering teams. DevTrack lets you manage multiple projects, triage issues by status and priority, and stay oriented with a live insights panel — all from a single-page interface.
 
 ---
 
-## Prerequisites
+## Features
+
+- **Multi-project support** — create, switch between, and manage independent projects from a persistent sidebar
+- **Full issue lifecycle** — create, edit, and delete issues with title, description, status, priority, and free-form labels
+- **Real-time filtering** — debounced search, status tabs, and priority filter with server-side query execution
+- **Dashboard stats** — per-project issue counts (total, open, in progress, closed) always reflecting the full dataset
+- **Insights panel** — status breakdown with progress bars, priority distribution, and recent activity feed
+- **Issue traceability** — each issue displays a short ID, opened date, and last-updated timestamp
+
+---
+
+## Technologies Used
+
+**Client**
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS
+
+**Server**
+- Node.js + Express 5
+- TypeScript + tsx
+- Mongoose + MongoDB
+
+---
+
+## Setup and Installation
+
+### Prerequisites
 
 | Tool | Version |
 |------|---------|
@@ -12,91 +39,69 @@ A minimal, dark-themed issue tracker for engineering teams. Supports multiple pr
 | npm | ≥ 9 |
 | MongoDB | ≥ 6 (local or Atlas) |
 
----
+### 1. Clone the repository
 
-## Environment Setup
+```bash
+git clone <repo-url>
+cd devtrack
+```
 
-1. Copy the example env file:
+### 2. Install dependencies
+
+```bash
+# Server
+cd server && npm install
+
+# Client
+cd ../client && npm install
+```
+
+### 3. Configure environment variables
 
 ```bash
 cp server/.env.example server/.env
 ```
 
-2. Open `server/.env` and set your connection string:
+Edit `server/.env`:
 
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/devtrack
 ```
 
-For MongoDB Atlas replace the value with your Atlas connection URI.
+Replace `MONGO_URI` with your Atlas connection string if using MongoDB Atlas.
+
+### 4. Seed the database (optional)
+
+Inserts 3 sample projects and 14 issues:
+
+```bash
+cd server && npm run seed
+```
 
 ---
 
-## Running in Development
+## Running the Application
 
-Both servers must run concurrently. Open two terminals.
+Open two terminals from the project root.
 
-**Server** (Express + Mongoose, port 5000):
+**Terminal 1 — Server:**
 
 ```bash
 cd server
-npm install
 npm run dev
 ```
 
-**Client** (React + Vite, port 5173):
+Runs on `http://localhost:5000`
+
+**Terminal 2 — Client:**
 
 ```bash
 cd client
-npm install
 npm run dev
 ```
 
-The Vite dev server proxies all `/api` requests to `http://localhost:5000`, so no CORS configuration is needed locally.
-
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
----
-
-## Seeding the Database
-
-Wipes all existing data and inserts 3 sample projects with 14 issues:
-
-```bash
-cd server
-npm run seed
-```
-
----
-
-## Running Tests
-
-> Phase 2 was replaced with manual API testing via `server/tests/api.http`. No automated test suite is configured.
-
-To run manual tests, open `server/tests/api.http` in VS Code with the REST Client extension.
-
----
-
-## Project Structure
-
-```
-devtrack/
-├── client/                  # React + Vite + Tailwind frontend
-│   └── src/
-│       ├── api/             # Typed fetch wrappers
-│       ├── components/      # UI components
-│       │   └── ui/          # Reusable primitives (Badge, Spinner, Modal, FormField)
-│       ├── context/         # ProjectContext, IssueContext
-│       └── types/           # Shared TypeScript interfaces
-└── server/                  # Express + Mongoose backend
-    └── src/
-        ├── controllers/     # Route handler logic
-        ├── lib/             # MongoDB connection helper
-        ├── middleware/       # Error handler, resolveProject
-        ├── models/          # Mongoose schemas (Project, Issue)
-        └── routes/          # Express routers
-```
+Runs on `http://localhost:5173`. The Vite dev server proxies all `/api` requests to the server, so no CORS setup is needed.
 
 ---
 
@@ -106,58 +111,43 @@ Base URL: `http://localhost:5000`
 
 ### Projects
 
-| Method | Path | Description |
-|--------|------|-------------|
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | `GET` | `/api/projects` | List all projects |
 | `POST` | `/api/projects` | Create a project |
-| `GET` | `/api/projects/:projectId` | Get a project by ID |
-| `PATCH` | `/api/projects/:projectId` | Update a project |
-| `DELETE` | `/api/projects/:projectId` | Delete project + all its issues |
+| `GET` | `/api/projects/:id` | Get a project by ID |
+| `PATCH` | `/api/projects/:id` | Update a project |
+| `DELETE` | `/api/projects/:id` | Delete project and all its issues |
 
-### Issues (scoped to a project)
+### Issues
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/projects/:projectId/issues` | List issues (supports `?search`, `?status`, `?priority`) |
-| `GET` | `/api/projects/:projectId/issues/stats` | Aggregated counts (total, open, inProgress, closed) |
-| `GET` | `/api/projects/:projectId/issues/:id` | Get a single issue |
-| `POST` | `/api/projects/:projectId/issues` | Create an issue |
-| `PATCH` | `/api/projects/:projectId/issues/:id` | Partial update an issue |
-| `DELETE` | `/api/projects/:projectId/issues/:id` | Delete an issue |
-
-### Request / Response shapes
-
-**Create / update issue body:**
-```json
-{
-  "title": "string (required, 1–100 chars)",
-  "description": "string (optional, max 500 chars)",
-  "status": "Open | In Progress | Closed",
-  "priority": "Low | Medium | High | Critical",
-  "labels": ["string"]
-}
-```
-
-**Error envelope:**
-```json
-{ "error": "Human-readable message", "details": { "field": "message" } }
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/projects/:id/issues` | List issues (`?search`, `?status`, `?priority`) |
+| `GET` | `/api/projects/:id/issues/stats` | Aggregated counts |
+| `GET` | `/api/projects/:id/issues/:issueId` | Get a single issue |
+| `POST` | `/api/projects/:id/issues` | Create an issue |
+| `PATCH` | `/api/projects/:id/issues/:issueId` | Partial update |
+| `DELETE` | `/api/projects/:id/issues/:issueId` | Delete an issue |
 
 ---
 
-## Acceptance Criteria
+## AI Tool Used
 
-| ID | Criterion | Status |
-|----|-----------|--------|
-| AC-1 | Issue list renders title, status badge, priority badge, labels, ID, created and updated timestamps | ✅ |
-| AC-2 | Creating an issue with a missing title returns 400 and shows field error | ✅ |
-| AC-3 | Updating status to "Closed" reflects in list and stats without page reload | ✅ |
-| AC-4 | Deleting an issue removes it from the list and updates stats | ✅ |
-| AC-5 | Search debounced ≤ 400 ms, preserves active filters | ✅ |
-| AC-6 | Status + priority filters combine correctly | ✅ |
-| AC-7 | Dashboard stats always reflect whole dataset regardless of active filter | ✅ |
-| AC-8 | Loading spinner shown while any fetch is in flight | ✅ |
-| AC-9 | API unreachable → error message shown, no mock data | ✅ |
-| AC-10 | Issues and projects persist in MongoDB across server restarts | ✅ |
-| AC-11 | API tests — replaced with manual `api.http` test file | ➖ |
-| AC-12 | README documents prerequisites, env, dev commands, API summary | ✅ |
+This project was built using **Kiro** 
+
+### AI Development Experience
+
+Kiro was used throughout the entire development cycle, acting as a collaborative engineering partner rather than just a code generator. Development was structured around a spec document (requirements, data models, API contracts, acceptance criteria, and a phased task list) that Kiro helped produce and then systematically worked through.
+
+The workflow was conversational: design decisions were discussed first, then Kiro implemented them, type-checked and built the output before presenting results, and picked up again after a session crash by reading the spec artifact and the current codebase state.
+
+### Specific Tasks Where Kiro Was Used
+
+1. **API design and server implementation** — Kiro designed the full REST API including nested resource routing (`/api/projects/:id/issues`), the `resolveProject` middleware pattern, cascade-delete behaviour, and all Mongoose schema validation rules. It then implemented every controller, route, and error handler.
+
+2. **Multi-project refactor** — When multi-project support was added, Kiro planned the schema change (adding a `project` ref to `Issue`), updated every query to scope by `projectId`, introduced a new `ProjectContext`, re-threaded the `IssueContext` to accept a `projectId` prop, and rewrote the seed script — coordinating across 10+ files in one session.
+
+3. **UI component system** — Kiro built the full component tree from scratch: reusable primitives (`Badge`, `Spinner`, `Modal`, `FormField`), shared form components (`IssueForm`, `ProjectForm`) used by both create and edit modals, and the insights panel with live status bars and relative timestamps.
+
+4. **Debugging and iterative refinement** — Several UI issues were fixed through conversation: the sidebar scrolling with the page (fixed with `position: fixed` + `ml-52` offset), redundant stat badges in the header, coloured top borders on cards, and the issue card layout being too flat (refactored to a taller three-row design with ID, title, and badges on separate rows).

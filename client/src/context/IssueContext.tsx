@@ -32,7 +32,12 @@ const IssueContext = createContext<(IssueState & IssueActions) | null>(null);
 const DEFAULT_FILTERS: IssueFilters = { search: '', status: '', priority: '' };
 const DEBOUNCE_MS = 400;
 
-export function IssueProvider({ children }: { children: ReactNode }) {
+interface IssueProviderProps {
+  projectId: string;
+  children: ReactNode;
+}
+
+export function IssueProvider({ projectId, children }: IssueProviderProps) {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [stats, setStats] = useState<IssueStats | null>(null);
   const [filters, setFiltersState] = useState<IssueFilters>(DEFAULT_FILTERS);
@@ -46,36 +51,33 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     setIsLoadingIssues(true);
     setError(null);
     try {
-      const data = await api.fetchIssues(f);
+      const data = await api.fetchIssues(projectId, f);
       setIssues(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load issues');
-      // Never replace real data with mock data — leave issues empty on error
       setIssues([]);
     } finally {
       setIsLoadingIssues(false);
     }
-  }, []);
+  }, [projectId]);
 
   const loadStats = useCallback(async () => {
     setIsLoadingStats(true);
     try {
-      const data = await api.fetchStats();
+      const data = await api.fetchStats(projectId);
       setStats(data);
     } catch {
-      // Stats failure is non-fatal; dashboard will show dashes
       setStats(null);
     } finally {
       setIsLoadingStats(false);
     }
-  }, []);
+  }, [projectId]);
 
   // Debounce search; fire immediately for status/priority changes
   const setFilters = useCallback(
     (partial: Partial<IssueFilters>) => {
       setFiltersState((prev) => {
         const next = { ...prev, ...partial };
-
         const searchChanged = partial.search !== undefined && partial.search !== prev.search;
 
         if (searchChanged) {
@@ -97,34 +99,37 @@ export function IssueProvider({ children }: { children: ReactNode }) {
     loadStats();
   }, [filters, loadIssues, loadStats]);
 
-  // Initial load
+  // Reset and reload when project changes
   useEffect(() => {
+    setFiltersState(DEFAULT_FILTERS);
+    setIssues([]);
+    setStats(null);
     loadIssues(DEFAULT_FILTERS);
     loadStats();
-  }, [loadIssues, loadStats]);
+  }, [projectId, loadIssues, loadStats]);
 
   const createIssue = useCallback(
     async (payload: CreateIssuePayload) => {
-      await api.createIssue(payload);
+      await api.createIssue(projectId, payload);
       refreshAll();
     },
-    [refreshAll]
+    [projectId, refreshAll]
   );
 
   const updateIssue = useCallback(
     async (id: string, payload: UpdateIssuePayload) => {
-      await api.updateIssue(id, payload);
+      await api.updateIssue(projectId, id, payload);
       refreshAll();
     },
-    [refreshAll]
+    [projectId, refreshAll]
   );
 
   const deleteIssue = useCallback(
     async (id: string) => {
-      await api.deleteIssue(id);
+      await api.deleteIssue(projectId, id);
       refreshAll();
     },
-    [refreshAll]
+    [projectId, refreshAll]
   );
 
   return (

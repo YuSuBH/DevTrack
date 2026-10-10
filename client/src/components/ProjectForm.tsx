@@ -41,7 +41,7 @@ export function ProjectForm({ initial, onSubmit, onCancel, submitLabel = 'Save' 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       {submitError && (
-        <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+        <div className="rounded border border-red-800 bg-red-950/50 px-3 py-2 text-xs text-red-400">
           {submitError}
         </div>
       )}
@@ -75,14 +75,14 @@ export function ProjectForm({ initial, onSubmit, onCancel, submitLabel = 'Save' 
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50 transition-colors"
+          className="rounded border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 hover:bg-neutral-700 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-1.5 rounded bg-neutral-800 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded bg-neutral-600 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-500 transition-colors disabled:opacity-50"
         >
           {saving && <Spinner size="sm" className="border-white/30 border-t-white" />}
           {submitLabel}

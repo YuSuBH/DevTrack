@@ -10,9 +10,7 @@ interface IssueCardProps {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric',
-  });
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export function IssueCard({ issue, onEdit }: IssueCardProps) {
@@ -30,12 +28,10 @@ export function IssueCard({ issue, onEdit }: IssueCardProps) {
   }
 
   return (
-    <article className="group flex items-center gap-3 rounded-lg bg-white px-4 py-3 ring-1 ring-neutral-200 hover:ring-neutral-300 transition-colors">
+    <article className="group flex items-center gap-3 rounded-lg bg-neutral-900 px-4 py-3 ring-1 ring-neutral-800 hover:ring-neutral-700 transition-colors">
       {/* Title + badges */}
       <div className="flex flex-1 items-center gap-3 min-w-0">
-        <h3 className="text-sm font-medium text-neutral-800 truncate">
-          {issue.title}
-        </h3>
+        <h3 className="text-sm font-medium text-neutral-200 truncate">{issue.title}</h3>
         <div className="flex shrink-0 items-center gap-1.5">
           <StatusBadge status={issue.status} />
           <PriorityBadge priority={issue.priority} />
@@ -45,13 +41,12 @@ export function IssueCard({ issue, onEdit }: IssueCardProps) {
 
       {/* Date + actions */}
       <div className="flex shrink-0 items-center gap-2">
-        <span className="text-xs text-neutral-400 tabular-nums">{formatDate(issue.createdAt)}</span>
-
+        <span className="text-xs text-neutral-600 tabular-nums">{formatDate(issue.createdAt)}</span>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(issue)}
             aria-label={`Edit issue: ${issue.title}`}
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+            className="rounded p-1.5 text-neutral-600 hover:bg-neutral-800 hover:text-neutral-300 transition-colors"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M11 2l3 3-8 8H3v-3l8-8z" strokeLinejoin="round" />
@@ -61,7 +56,7 @@ export function IssueCard({ issue, onEdit }: IssueCardProps) {
             onClick={handleDelete}
             disabled={deleting}
             aria-label={`Delete issue: ${issue.title}`}
-            className="rounded p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
+            className="rounded p-1.5 text-neutral-600 hover:bg-red-900/40 hover:text-red-400 transition-colors disabled:opacity-40"
           >
             {deleting
               ? <Spinner size="sm" />

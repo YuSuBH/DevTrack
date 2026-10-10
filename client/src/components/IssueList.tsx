@@ -21,7 +21,7 @@ export function IssueList({ onEdit }: IssueListProps) {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+      <div className="rounded-lg border border-red-900 bg-red-950/50 px-5 py-4 text-sm text-red-400">
         <span className="font-medium">Error:</span> {error}
       </div>
     );
@@ -29,8 +29,8 @@ export function IssueList({ onEdit }: IssueListProps) {
 
   if (issues.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-neutral-400">
-        <svg className="h-8 w-8 text-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-neutral-600">
+        <svg className="h-8 w-8 text-neutral-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="5" width="18" height="16" rx="2" />
           <path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
         </svg>
@@ -40,7 +40,7 @@ export function IssueList({ onEdit }: IssueListProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       {issues.map((issue) => (
         <IssueCard key={issue._id} issue={issue} onEdit={onEdit} />
       ))}

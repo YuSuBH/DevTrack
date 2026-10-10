@@ -1,6 +1,5 @@
 import { useIssues } from '../context/IssueContext';
 import type { IssueStatus, IssuePriority } from '../types/issue';
-import { inputCls } from './ui/FormField';
 
 const STATUS_TABS: Array<{ label: string; value: IssueStatus | '' }> = [
   { label: 'All',         value: ''            },
@@ -19,11 +18,11 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
   const { filters, setFilters } = useIssues();
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg bg-white px-3 py-2.5 ring-1 ring-neutral-200">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg bg-neutral-900 px-3 py-2.5 ring-1 ring-neutral-800">
       {/* Search */}
       <div className="relative min-w-[180px] flex-1">
         <svg
-          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400"
+          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-600"
           viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"
         >
           <circle cx="6.5" cy="6.5" r="4.5" />
@@ -34,13 +33,13 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
           placeholder="Search issues…"
           value={filters.search}
           onChange={(e) => setFilters({ search: e.target.value })}
-          className="w-full rounded border-0 bg-transparent py-1 pl-8 pr-2 text-sm text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
+          className="w-full rounded border-0 bg-transparent py-1 pl-8 pr-2 text-sm text-neutral-300 placeholder:text-neutral-600 focus:outline-none"
           aria-label="Search issues by title"
         />
       </div>
 
       {/* Divider */}
-      <div className="h-5 w-px bg-neutral-200" />
+      <div className="h-5 w-px bg-neutral-700" />
 
       {/* Status pill tabs */}
       <div className="flex items-center gap-1">
@@ -52,8 +51,8 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
               onClick={() => setFilters({ status: value as IssueStatus | '' })}
               className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
                 active
-                  ? 'bg-neutral-800 text-white'
-                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700'
+                  ? 'bg-neutral-700 text-neutral-100'
+                  : 'text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300'
               }`}
             >
               {label}
@@ -63,13 +62,13 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
       </div>
 
       {/* Divider */}
-      <div className="h-5 w-px bg-neutral-200" />
+      <div className="h-5 w-px bg-neutral-700" />
 
       {/* Priority select */}
       <select
         value={filters.priority}
         onChange={(e) => setFilters({ priority: e.target.value as IssuePriority | '' })}
-        className="cursor-pointer rounded border-0 bg-transparent py-1 text-xs text-neutral-500 focus:outline-none hover:text-neutral-700"
+        className="cursor-pointer rounded border-0 bg-neutral-900 py-1 text-xs text-neutral-500 focus:outline-none hover:text-neutral-300 transition-colors"
         aria-label="Filter by priority"
       >
         <option value="">All priorities</option>
@@ -81,7 +80,7 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
       {/* New Issue */}
       <button
         onClick={onCreateClick}
-        className="ml-auto flex items-center gap-1.5 rounded bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 transition-colors"
+        className="ml-auto flex items-center gap-1.5 rounded bg-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-100 hover:bg-neutral-600 transition-colors"
       >
         <svg className="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M8 3v10M3 8h10" strokeLinecap="round" />

@@ -1,0 +1,168 @@
+@baseUrl = http://localhost:5000/api
+@issueId = REPLACE_WITH_REAL_ID
+
+### ─── HEALTH ────────────────────────────────────────────────────────────────
+
+### [1] Health check
+# Expected: 200 { "status": "ok" }
+GET http://localhost:5000/health
+
+### ─── STATS ──────────────────────────────────────────────────────────────────
+
+### [2] Get dashboard stats
+# Expected: 200 { "data": { "total": 10, "open": 5, "inProgress": 2, "closed": 3 } }
+GET {{baseUrl}}/issues/stats
+
+### ─── LIST ISSUES ────────────────────────────────────────────────────────────
+
+### [3] Get all issues (newest first)
+# Expected: 200 { "data": [ ...10 issues... ] }
+GET {{baseUrl}}/issues
+
+### [4] Search by title — matches "crash"
+# Expected: 200 { "data": [ ...1 issue with "crashes" in title... ] }
+GET {{baseUrl}}/issues?search=crash
+
+### [5] Search with no match
+# Expected: 200 { "data": [] }
+GET {{baseUrl}}/issues?search=zzznomatch
+
+### [6] Filter by status — Open
+# Expected: 200 { "data": [ ...5 Open issues... ] }
+GET {{baseUrl}}/issues?status=Open
+
+### [7] Filter by priority — Critical
+# Expected: 200 { "data": [ ...1 Critical issue... ] }
+GET {{baseUrl}}/issues?priority=Critical
+
+### [8] Filter by status + priority
+# Expected: 200 { "data": [ ...Open + High issues... ] }
+GET {{baseUrl}}/issues?status=Open&priority=High
+
+### ─── CREATE ──────────────────────────────────────────────────────────────────
+
+### [9] Create a valid issue
+# Expected: 201 { "data": { "_id": "...", "title": "New test issue", "status": "Open", "priority": "Medium", "labels": ["test"], ... } }
+POST {{baseUrl}}/issues
+Content-Type: application/json
+
+{
+  "title": "New test issue",
+  "description": "Created during manual testing",
+  "status": "Open",
+  "priority": "Medium",
+  "labels": ["test"]
+}
+
+### [10] Create with missing title — validation error
+# Expected: 400 { "error": "Validation failed", "details": { "title": "Title is required" } }
+POST {{baseUrl}}/issues
+Content-Type: application/json
+
+{
+  "description": "No title supplied",
+  "status": "Open",
+  "priority": "Low"
+}
+
+### [11] Create with invalid status
+# Expected: 400 { "error": "Validation failed", "details": { "status": "Status must be Open, In Progress, or Closed" } }
+POST {{baseUrl}}/issues
+Content-Type: application/json
+
+{
+  "title": "Bad status issue",
+  "status": "Pending",
+  "priority": "Low"
+}
+
+### [12] Create with invalid priority
+# Expected: 400 { "error": "Validation failed", "details": { "priority": "Priority must be Low, Medium, High, or Critical" } }
+POST {{baseUrl}}/issues
+Content-Type: application/json
+
+{
+  "title": "Bad priority issue",
+  "status": "Open",
+  "priority": "Urgent"
+}
+
+### [13] Create with title too long (>100 chars)
+# Expected: 400 { "error": "Validation failed", "details": { "title": "Title must be 100 characters or fewer" } }
+POST {{baseUrl}}/issues
+Content-Type: application/json
+
+{
+  "title": "This title is way too long and should be rejected by the server because it exceeds one hundred characters total",
+  "status": "Open",
+  "priority": "Low"
+}
+
+### ─── READ ONE ────────────────────────────────────────────────────────────────
+
+# Copy an _id from the response to [3] or [9] and paste it into @issueId above
+
+### [14] Get issue by ID
+# Expected: 200 { "data": { "_id": "{{issueId}}", ... } }
+GET {{baseUrl}}/issues/{{issueId}}
+
+### [15] Get issue with invalid ID format
+# Expected: 400 { "error": "Invalid issue ID" }
+GET {{baseUrl}}/issues/not-a-valid-id
+
+### [16] Get issue with valid but non-existent ID
+# Expected: 404 { "error": "Issue not found" }
+GET {{baseUrl}}/issues/000000000000000000000001
+
+### ─── UPDATE ──────────────────────────────────────────────────────────────────
+
+### [17] Update status only (partial update)
+# Expected: 200 { "data": { "status": "In Progress", ... other fields unchanged ... } }
+PATCH {{baseUrl}}/issues/{{issueId}}
+Content-Type: application/json
+
+{
+  "status": "In Progress"
+}
+
+### [18] Update multiple fields
+# Expected: 200 { "data": { "priority": "Critical", "labels": ["test", "regression"], ... } }
+PATCH {{baseUrl}}/issues/{{issueId}}
+Content-Type: application/json
+
+{
+  "priority": "Critical",
+  "labels": ["test", "regression"]
+}
+
+### [19] Update with invalid status
+# Expected: 400 { "error": "Validation failed", "details": { "status": "..." } }
+PATCH {{baseUrl}}/issues/{{issueId}}
+Content-Type: application/json
+
+{
+  "status": "Done"
+}
+
+### [20] Update non-existent issue
+# Expected: 404 { "error": "Issue not found" }
+PATCH {{baseUrl}}/issues/000000000000000000000001
+Content-Type: application/json
+
+{
+  "status": "Closed"
+}
+
+### ─── DELETE ──────────────────────────────────────────────────────────────────
+
+### [21] Delete issue by ID
+# Expected: 200 { "message": "Issue deleted" }
+DELETE {{baseUrl}}/issues/{{issueId}}
+
+### [22] Delete same ID again — should 404
+# Expected: 404 { "error": "Issue not found" }
+DELETE {{baseUrl}}/issues/{{issueId}}
+
+### [23] Delete with invalid ID format
+# Expected: 400 { "error": "Invalid issue ID" }
+DELETE {{baseUrl}}/issues/not-a-valid-id

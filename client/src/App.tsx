@@ -1,39 +1,64 @@
 import { useState } from 'react';
 import { ProjectProvider, useProjects } from './context/ProjectContext';
-import { IssueProvider } from './context/IssueContext';
+import { IssueProvider, useIssues } from './context/IssueContext';
 import type { Issue } from './types/issue';
 
 import { ProjectList }       from './components/ProjectList';
 import { DashboardStats }    from './components/DashboardStats';
 import { IssueFilters }      from './components/IssueFilters';
 import { IssueList }         from './components/IssueList';
+import { InsightsPanel }     from './components/InsightsPanel';
 import { CreateIssueModal }  from './components/CreateIssueModal';
 import { EditIssueModal }    from './components/EditIssueModal';
 import { EditProjectModal }  from './components/EditProjectModal';
 import { Spinner }           from './components/ui/Spinner';
 
-// ── Inner shell — rendered once we know the active project ─────────────────
+// ── Compact inline stat badges shown below the project title ────────────────
+
+function ProjectHeaderStats() {
+  const { stats, isLoadingStats } = useIssues();
+  if (isLoadingStats || !stats) return null;
+
+  const chips: Array<{ label: string; cls: string }> = [
+    { label: `${stats.total} issues`,      cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200'  },
+    { label: `${stats.open} open`,         cls: 'bg-blue-50 text-blue-700 ring-blue-200'            },
+    { label: `${stats.inProgress} in progress`, cls: 'bg-amber-50 text-amber-700 ring-amber-200'   },
+    { label: `${stats.closed} closed`,     cls: 'bg-neutral-100 text-neutral-500 ring-neutral-200'  },
+  ];
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+      {chips.map(({ label, cls }) => (
+        <span
+          key={label}
+          className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ring-1 ${cls}`}
+        >
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── Main project workspace ──────────────────────────────────────────────────
 
 function ProjectShell() {
   const { activeProject, isLoading, projects } = useProjects();
 
-  const [createOpen,    setCreateOpen]    = useState(false);
-  const [editingIssue,  setEditingIssue]  = useState<Issue | null>(null);
+  const [createOpen,     setCreateOpen]     = useState(false);
+  const [editingIssue,   setEditingIssue]   = useState<Issue | null>(null);
   const [editingProject, setEditingProject] = useState(false);
 
-  // Loading state — projects still being fetched
   if (isLoading) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <div className="flex items-center gap-2 text-sm text-neutral-500">
-          <Spinner size="md" />
-          Loading projects…
+          <Spinner size="md" /> Loading projects…
         </div>
       </main>
     );
   }
 
-  // No projects at all
   if (projects.length === 0 || !activeProject) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-3 text-center px-6">
@@ -49,13 +74,14 @@ function ProjectShell() {
 
   return (
     <IssueProvider projectId={activeProject._id}>
-      <main className="flex flex-1 flex-col min-w-0">
-        {/* Top bar */}
+      <main className="flex flex-1 flex-col min-w-0 overflow-hidden">
+
+        {/* ── Project header ── */}
         <header className="border-b border-neutral-200 bg-white px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-semibold text-neutral-800 truncate">
+                <h1 className="text-lg font-semibold text-neutral-800 truncate">
                   {activeProject.name}
                 </h1>
                 <button
@@ -68,32 +94,40 @@ function ProjectShell() {
                   </svg>
                 </button>
               </div>
-              {activeProject.description ? (
+              {activeProject.description && (
                 <p className="text-xs text-neutral-500 mt-0.5 truncate">
                   {activeProject.description}
                 </p>
-              ) : (
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  Track, triage, and resolve issues.
-                </p>
               )}
+              <ProjectHeaderStats />
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <div className="flex flex-col gap-5 px-6 py-5">
+        {/* ── Content — stat cards + two-column body ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+
+          {/* Stat cards row */}
           <DashboardStats />
-          <IssueFilters onCreateClick={() => setCreateOpen(true)} />
-          <IssueList onEdit={(issue) => setEditingIssue(issue)} />
+
+          {/* Issues + insights side by side */}
+          <div className="flex gap-5 items-start">
+
+            {/* Left: toolbar + list */}
+            <div className="flex flex-1 flex-col gap-3 min-w-0">
+              <IssueFilters onCreateClick={() => setCreateOpen(true)} />
+              <IssueList onEdit={(issue) => setEditingIssue(issue)} />
+            </div>
+
+            {/* Right: insights panel */}
+            <InsightsPanel />
+          </div>
         </div>
       </main>
 
-      {/* Issue modals */}
+      {/* Modals */}
       <CreateIssueModal open={createOpen}    onClose={() => setCreateOpen(false)} />
       <EditIssueModal   issue={editingIssue} onClose={() => setEditingIssue(null)} />
-
-      {/* Project edit modal */}
       <EditProjectModal
         project={editingProject ? activeProject : null}
         onClose={() => setEditingProject(false)}
@@ -107,7 +141,7 @@ function ProjectShell() {
 export default function App() {
   return (
     <ProjectProvider>
-      <div className="flex min-h-screen bg-neutral-50 font-sans text-neutral-800 antialiased">
+      <div className="flex h-screen overflow-hidden bg-neutral-50 font-sans text-neutral-800 antialiased">
 
         {/* ── Sidebar ── */}
         <aside className="hidden md:flex fixed inset-y-0 left-0 w-52 flex-col bg-neutral-900 text-neutral-300 z-30">
@@ -131,7 +165,7 @@ export default function App() {
           </div>
         </aside>
 
-        {/* ── Main area — offset by sidebar width on md+ ── */}
+        {/* ── Main area — offset by sidebar width ── */}
         <div className="flex flex-1 flex-col min-w-0 md:ml-52">
           <ProjectShell />
         </div>

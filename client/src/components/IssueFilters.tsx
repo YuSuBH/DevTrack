@@ -2,10 +2,14 @@ import { useIssues } from '../context/IssueContext';
 import type { IssueStatus, IssuePriority } from '../types/issue';
 import { inputCls } from './ui/FormField';
 
-const STATUS_OPTIONS: IssueStatus[] = ['Open', 'In Progress', 'Closed'];
-const PRIORITY_OPTIONS: IssuePriority[] = ['Low', 'Medium', 'High', 'Critical'];
+const STATUS_TABS: Array<{ label: string; value: IssueStatus | '' }> = [
+  { label: 'All',         value: ''            },
+  { label: 'Open',        value: 'Open'        },
+  { label: 'In Progress', value: 'In Progress' },
+  { label: 'Closed',      value: 'Closed'      },
+];
 
-const selectCls = `${inputCls} cursor-pointer`;
+const PRIORITY_OPTIONS: IssuePriority[] = ['Low', 'Medium', 'High', 'Critical'];
 
 interface IssueFiltersProps {
   onCreateClick: () => void;
@@ -15,9 +19,9 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
   const { filters, setFilters } = useIssues();
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg bg-white px-3 py-2.5 ring-1 ring-neutral-200">
       {/* Search */}
-      <div className="relative flex-1 min-w-[180px]">
+      <div className="relative min-w-[180px] flex-1">
         <svg
           className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400"
           viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"
@@ -27,32 +31,45 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
         </svg>
         <input
           type="search"
-          placeholder="Search titles…"
+          placeholder="Search issues…"
           value={filters.search}
           onChange={(e) => setFilters({ search: e.target.value })}
-          className={`${inputCls} pl-8`}
+          className="w-full rounded border-0 bg-transparent py-1 pl-8 pr-2 text-sm text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
           aria-label="Search issues by title"
         />
       </div>
 
-      {/* Status */}
-      <select
-        value={filters.status}
-        onChange={(e) => setFilters({ status: e.target.value as IssueStatus | '' })}
-        className={`${selectCls} w-36`}
-        aria-label="Filter by status"
-      >
-        <option value="">All statuses</option>
-        {STATUS_OPTIONS.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
+      {/* Divider */}
+      <div className="h-5 w-px bg-neutral-200" />
 
-      {/* Priority */}
+      {/* Status pill tabs */}
+      <div className="flex items-center gap-1">
+        {STATUS_TABS.map(({ label, value }) => {
+          const active = filters.status === value;
+          return (
+            <button
+              key={label}
+              onClick={() => setFilters({ status: value as IssueStatus | '' })}
+              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                active
+                  ? 'bg-neutral-800 text-white'
+                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Divider */}
+      <div className="h-5 w-px bg-neutral-200" />
+
+      {/* Priority select */}
       <select
         value={filters.priority}
         onChange={(e) => setFilters({ priority: e.target.value as IssuePriority | '' })}
-        className={`${selectCls} w-36`}
+        className="cursor-pointer rounded border-0 bg-transparent py-1 text-xs text-neutral-500 focus:outline-none hover:text-neutral-700"
         aria-label="Filter by priority"
       >
         <option value="">All priorities</option>
@@ -61,12 +78,12 @@ export function IssueFilters({ onCreateClick }: IssueFiltersProps) {
         ))}
       </select>
 
-      {/* Create button */}
+      {/* New Issue */}
       <button
         onClick={onCreateClick}
-        className="ml-auto flex items-center gap-1.5 rounded bg-neutral-800 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700 transition-colors"
+        className="ml-auto flex items-center gap-1.5 rounded bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 transition-colors"
       >
-        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M8 3v10M3 8h10" strokeLinecap="round" />
         </svg>
         New Issue

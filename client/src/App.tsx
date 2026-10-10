@@ -110,7 +110,7 @@ export default function App() {
       <div className="flex min-h-screen bg-neutral-50 font-sans text-neutral-800 antialiased">
 
         {/* ── Sidebar ── */}
-        <aside className="hidden md:flex w-52 shrink-0 flex-col bg-neutral-900 text-neutral-300">
+        <aside className="hidden md:flex fixed inset-y-0 left-0 w-52 flex-col bg-neutral-900 text-neutral-300 z-30">
           {/* Brand */}
           <div className="flex items-center gap-2 border-b border-neutral-800 px-5 py-4">
             <svg className="h-5 w-5 text-neutral-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -131,8 +131,10 @@ export default function App() {
           </div>
         </aside>
 
-        {/* ── Main area ── */}
-        <ProjectShell />
+        {/* ── Main area — offset by sidebar width on md+ ── */}
+        <div className="flex flex-1 flex-col min-w-0 md:ml-52">
+          <ProjectShell />
+        </div>
 
       </div>
     </ProjectProvider>

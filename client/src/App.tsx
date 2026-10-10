@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProjectProvider, useProjects } from './context/ProjectContext';
-import { IssueProvider, useIssues } from './context/IssueContext';
+import { IssueProvider } from './context/IssueContext';
 import type { Issue } from './types/issue';
 
 import { ProjectList }       from './components/ProjectList';
@@ -12,30 +12,6 @@ import { CreateIssueModal }  from './components/CreateIssueModal';
 import { EditIssueModal }    from './components/EditIssueModal';
 import { EditProjectModal }  from './components/EditProjectModal';
 import { Spinner }           from './components/ui/Spinner';
-
-// ── Inline stat chips in the project header ─────────────────────────────────
-
-function ProjectHeaderStats() {
-  const { stats, isLoadingStats } = useIssues();
-  if (isLoadingStats || !stats) return null;
-
-  const chips: Array<{ label: string; cls: string }> = [
-    { label: `${stats.total} issues`,          cls: 'bg-neutral-800 text-neutral-300 ring-neutral-700'  },
-    { label: `${stats.open} open`,             cls: 'bg-blue-900/60 text-blue-300 ring-blue-700'        },
-    { label: `${stats.inProgress} in progress`,cls: 'bg-amber-900/50 text-amber-300 ring-amber-700'     },
-    { label: `${stats.closed} closed`,         cls: 'bg-neutral-800 text-neutral-400 ring-neutral-700'  },
-  ];
-
-  return (
-    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-      {chips.map(({ label, cls }) => (
-        <span key={label} className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ring-1 ${cls}`}>
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 // ── Project workspace ───────────────────────────────────────────────────────
 
@@ -74,36 +50,31 @@ function ProjectShell() {
       <main className="flex flex-1 flex-col min-w-0 overflow-hidden">
 
         {/* Header */}
-        <header className="border-b border-neutral-800 bg-neutral-950 px-6 py-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold text-neutral-100 truncate">
-                  {activeProject.name}
-                </h1>
-                <button
-                  onClick={() => setEditingProject(true)}
-                  aria-label={`Edit project: ${activeProject.name}`}
-                  className="shrink-0 rounded p-1 text-neutral-600 hover:bg-neutral-800 hover:text-neutral-300 transition-colors"
-                >
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M11 2l3 3-8 8H3v-3l8-8z" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              {activeProject.description && (
-                <p className="text-xs text-neutral-500 mt-0.5 truncate">{activeProject.description}</p>
-              )}
-              <ProjectHeaderStats />
-            </div>
+        <header className="border-b border-neutral-800 bg-neutral-950 px-6 py-6">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-neutral-100 tracking-tight truncate">
+              {activeProject.name}
+            </h1>
+            <button
+              onClick={() => setEditingProject(true)}
+              aria-label={`Edit project: ${activeProject.name}`}
+              className="shrink-0 rounded p-1 text-neutral-600 hover:bg-neutral-800 hover:text-neutral-300 transition-colors"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M11 2l3 3-8 8H3v-3l8-8z" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
+          {activeProject.description && (
+            <p className="text-sm text-neutral-500 mt-1 truncate">{activeProject.description}</p>
+          )}
         </header>
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-          <DashboardStats />
           <div className="flex gap-5 items-start">
             <div className="flex flex-1 flex-col gap-3 min-w-0">
+              <DashboardStats />
               <IssueFilters onCreateClick={() => setCreateOpen(true)} />
               <IssueList onEdit={(issue) => setEditingIssue(issue)} />
             </div>

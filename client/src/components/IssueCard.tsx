@@ -9,8 +9,25 @@ interface IssueCardProps {
   onEdit: (issue: Issue) => void;
 }
 
+/** Short human-readable ID: last 6 chars of ObjectId, uppercased */
+function shortId(id: string) {
+  return `#${id.slice(-6).toUpperCase()}`;
+}
+
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatUpdated(iso: string) {
+  const diff  = Date.now() - new Date(iso).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins  < 1)  return 'just now';
+  if (mins  < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days  <  7) return `${days}d ago`;
+  return formatDate(iso);
 }
 
 export function IssueCard({ issue, onEdit }: IssueCardProps) {
@@ -28,20 +45,25 @@ export function IssueCard({ issue, onEdit }: IssueCardProps) {
   }
 
   return (
-    <article className="group flex items-center gap-3 rounded-lg bg-neutral-900 px-4 py-3 ring-1 ring-neutral-800 hover:ring-neutral-700 transition-colors">
-      {/* Title + badges */}
-      <div className="flex flex-1 items-center gap-3 min-w-0">
-        <h3 className="text-sm font-medium text-neutral-200 truncate">{issue.title}</h3>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <StatusBadge status={issue.status} />
-          <PriorityBadge priority={issue.priority} />
-          {issue.labels.map((l) => <LabelChip key={l} label={l} />)}
-        </div>
-      </div>
+    <article className="group flex flex-col gap-2.5 rounded-lg bg-neutral-900 px-4 py-4 ring-1 ring-neutral-800 hover:ring-neutral-700 transition-colors">
 
-      {/* Date + actions */}
-      <div className="flex shrink-0 items-center gap-2">
-        <span className="text-xs text-neutral-600 tabular-nums">{formatDate(issue.createdAt)}</span>
+      {/* Row 1: short ID + timestamp · actions */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs font-mono font-medium text-neutral-500 tracking-wide">
+            {shortId(issue._id)}
+          </span>
+          <span className="text-neutral-700 text-xs">·</span>
+          <span className="text-xs text-neutral-600">
+            opened {formatDate(issue.createdAt)}
+          </span>
+          <span className="text-neutral-700 text-xs">·</span>
+          <span className="text-xs text-neutral-600">
+            updated {formatUpdated(issue.updatedAt)}
+          </span>
+        </div>
+
+        {/* Actions — always visible, subtle until hover */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(issue)}
@@ -69,6 +91,19 @@ export function IssueCard({ issue, onEdit }: IssueCardProps) {
           </button>
         </div>
       </div>
+
+      {/* Row 2: title */}
+      <h3 className="text-base font-semibold text-neutral-100 leading-snug">
+        {issue.title}
+      </h3>
+
+      {/* Row 3: badges */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <StatusBadge status={issue.status} />
+        <PriorityBadge priority={issue.priority} />
+        {issue.labels.map((l) => <LabelChip key={l} label={l} />)}
+      </div>
+
     </article>
   );
 }

@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { connectDB } from "./lib/db";
-import issueRoutes from "./routes/issues";
+import projectRoutes from "./routes/projects";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -19,7 +19,7 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 // API routes
-app.use("/api/issues", issueRoutes);
+app.use("/api/projects", projectRoutes);
 
 // Global error handler — must be registered after all routes
 app.use(errorHandler);

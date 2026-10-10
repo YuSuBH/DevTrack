@@ -1,9 +1,10 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export type IssueStatus = "Open" | "In Progress" | "Closed";
 export type IssuePriority = "Low" | "Medium" | "High" | "Critical";
 
 export interface IIssue extends Document {
+  project: Types.ObjectId;
   title: string;
   description: string;
   status: IssueStatus;
@@ -15,6 +16,12 @@ export interface IIssue extends Document {
 
 const issueSchema = new Schema<IIssue>(
   {
+    project: {
+      type: Schema.Types.ObjectId,
+      ref: "Project",
+      required: [true, "Project is required"],
+      index: true,
+    },
     title: {
       type: String,
       required: [true, "Title is required"],

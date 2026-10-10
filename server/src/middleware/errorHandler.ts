@@ -23,7 +23,7 @@ export function errorHandler(
 
   // Mongoose CastError (e.g. invalid ObjectId) → 400
   if (err instanceof MongooseError.CastError) {
-    res.status(400).json({ error: "Invalid issue ID" });
+    res.status(400).json({ error: "Invalid ID" });
     return;
   }
 

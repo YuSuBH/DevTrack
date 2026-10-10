@@ -8,7 +8,8 @@ import {
   deleteIssue,
 } from "../controllers/issueController";
 
-const router = Router();
+// mergeParams: true so :projectId from the parent router is accessible here
+const router = Router({ mergeParams: true });
 
 // Stats must be registered before /:id so it isn't swallowed as an id lookup
 router.get("/stats", getStats);
